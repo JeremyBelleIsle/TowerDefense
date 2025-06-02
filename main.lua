@@ -29,10 +29,13 @@ CurrentScreen = "Home"
 Levels_Unlocked = 1
 Level = 1
 Starting = true
+Size_Of_Finger = 0.08
+TutorialScreen = 0
 math.randomseed(os.time()) -- Truc qui sert à faire un nombre aléatoire à chaque fois que j'utilise math.random(x,x)
 CanonImage = love.graphics.newImage("Pixel Heart.png")
 HomeImage = love.graphics.newImage("Home.png")
 CadenasImage = love.graphics.newImage("Cadenas.png")
+FingerImage = love.graphics.newImage("Finger Pointing.png")
 ShootSound = love.audio.newSource("assets/mixkit-short-laser-gun-shot-1670.wav", "stream")
 GameOverSound = love.audio.newSource("assets/mixkit-sad-game-over-trombone-471.wav", "stream")
 BuzzSound = love.audio.newSource("assets/mixkit-wrong-electricity-buzz-955.wav", "stream")
@@ -58,6 +61,10 @@ love.graphics.setFont(Font)
 function Within(SelfX, SelfY, x, y, w, h)
     return x > SelfX and x < (SelfX + w) and
         y > SelfY and y < (SelfY + h)
+end
+
+function love.textinput(t)
+    TutorialScreen = TutorialScreen .. t
 end
 
 function Start_New_Wave()
@@ -443,7 +450,7 @@ function love.mousepressed(x, y, button)
                         Mode = "Bombe"
                     end
                 end
-                if Within(550, 300, x, y, 300, 100) and CurrentScreen == "Home" then
+                if Within(550, 300, x, y, 300, 100) and CurrentScreen == "Home" and not Tutorial then
                     HomeMusic:stop()
                     CurrentScreen = "Game"
                     PrincipalMusic:play()
@@ -470,7 +477,7 @@ function love.mousepressed(x, y, button)
                     CooldownShoot = 6.5
                     BossisFrezzing = false
                     love.graphics.setFont(Font)
-                elseif Within(550, 500, x, y, 300, 100) and CurrentScreen == "Home" then
+                elseif Within(550, 500, x, y, 300, 100) and CurrentScreen == "Home" and not Tutorial then
                     CurrentScreen = "Game"
                     HomeMusic:stop()
                     PrincipalMusic:play()
@@ -498,7 +505,7 @@ function love.mousepressed(x, y, button)
                     BossisFrezzing = false
                     love.graphics.setFont(Font)
                 end
-                if Within(550, 700, x, y, 300, 100) and CurrentScreen == "Home" then
+                if Within(550, 700, x, y, 300, 100) and CurrentScreen == "Home" and not Tutorial then
                     CurrentScreen = "Levels"
                 end
                 if Within(700, 300, x, y, 20, 20) and CurrentScreen == "Settings" then
@@ -655,7 +662,15 @@ function love.mousepressed(x, y, button)
                 Level = 2
             end
         else
-
+            if Within(175, 350, x, y, 200, 100) then
+                Starting = false
+                CurrentScreen = "Home"
+            elseif Within(775, 350, x, y, 200, 100) then
+                Starting = false
+                Tutorial = true
+                TutorialScreen = TutorialScreen + 1
+                CurrentScreen = "Home"
+            end
         end
     elseif button == 2 then
         if not Starting then
@@ -682,6 +697,15 @@ end
 -- Fonction d'affichage
 function love.draw()
     if not Starting then
+        if Tutorial and TutorialScreen then
+            love.graphics.setColor(0, 0, 0)
+            love.graphics.draw(FingerImage, 850, 750, -90, Size_Of_Finger)
+            if Size_Of_Finger >= 0.2 then
+                Size_Of_Finger = Size_Of_Finger - 0.001
+            elseif Size_Of_Finger <= 0.17 then
+                Size_Of_Finger = Size_Of_Finger + 0.001
+            end
+        end
         --all rectangles
         if CurrentScreen == "Home" then
             love.graphics.setBackgroundColor(1, 1, 1)
@@ -910,11 +934,21 @@ function love.draw()
                 100) --debug
         end
     else
-        love.graphics.rectangle("fill", 600, 250, 200, 100)
-        love.graphics.print("Start")
-        love.graphics.rectangle("fill", 600, 300, 200, 100)
-        love.graphics.print("Commencer")
-        love.graphics.print("le tutoriel")
+        love.graphics.setColor(0, 1, 0)
+        love.graphics.setFont(Font)
+        love.graphics.print("The official game of", 610, 10)
+        love.graphics.setFont(Font2)
+        love.graphics.print("   Tower Defense", -180, 50)
+        love.graphics.setFont(Font)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.rectangle("fill", 175, 350, 200, 100)
+        love.graphics.setColor(0, 0, 0)
+        love.graphics.print("Débuter", 200, 400)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.rectangle("fill", 775, 350, 200, 100)
+        love.graphics.setColor(0, 0, 0)
+        love.graphics.print("Débuter", 780, 385)
+        love.graphics.print("le tutoriel", 780, 415)
     end
 end
 
