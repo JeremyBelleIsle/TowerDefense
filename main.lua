@@ -7,6 +7,13 @@ Object = {}
 Enemis = {}
 Ball = {}
 BallGlace = {}
+Missions = {
+    { name = "Tuer 10 ennemis",        done = false },
+    { name = "Construire 5 tourelles", done = false },
+    { name = "Finir la vague 3",       done = false },
+    { name = "Ne perdre aucune vie",   done = false }
+}
+EnnemisKilled = 0
 Y_Of_Enemis = 800
 Money = 200
 PV = 20
@@ -35,11 +42,18 @@ Code = ""
 Hello_Jeremy = false
 PrintDebug = false
 TimerOfStepOfEnemis = 3
+local hue = 0              -- de 0 à 1 (tourne autour du cercle chromatique)
+local speed = 0.2          -- vitesse de changement de couleur
 math.randomseed(os.time()) -- Truc qui sert à faire un nombre aléatoire à chaque fois que j'utilise math.random(x,x)
 CanonImage = love.graphics.newImage("Pixel Heart.png")
+Heart = love.graphics.newImage("Canon.png")
 HomeImage = love.graphics.newImage("Home.png")
 CadenasImage = love.graphics.newImage("Cadenas.png")
 FingerImage = love.graphics.newImage("Finger Pointing.png")
+BackgroundLevel4 = love.graphics.newImage("Backgroundlevel4.png")
+BackgroundLevel3 = love.graphics.newImage("Backgroundlevel3.jpg")
+BackgroundLevel2 = love.graphics.newImage("Backgroundlevel2.jpg")
+BackgroundLevel1 = love.graphics.newImage("Backgroundlevel1.jpg")
 ShootSound = love.audio.newSource("assets/mixkit-short-laser-gun-shot-1670.wav", "stream")
 GameOverSound = love.audio.newSource("assets/mixkit-sad-game-over-trombone-471.wav", "stream")
 BuzzSound = love.audio.newSource("assets/mixkit-wrong-electricity-buzz-955.wav", "stream")
@@ -110,7 +124,7 @@ function Start_New_Wave()
         Money = Money + 60
     end
     Y_Of_Enemis = math.random(750, 715)
-    if Level == 3 then
+    if Level == 3 or Level == 4 then
         if CurrentWave ~= 4 then
             MaxEnnemisPerWave = MaxEnnemisPerWave + 10
         else
@@ -125,9 +139,56 @@ function Start_New_Wave()
     end
 end
 
+function UpdateMissions()
+    if EnnemisKilled >= 10 then
+        Missions[1].done = true
+    end
+    if #Object >= 5 then
+        Missions[2].done = true
+    end
+    if CurrentWave == 4 then
+        Missions[3].done = true
+    end
+    if PV == 20 and CurrentWave == 4 and Level == 1 then
+        Missions[4].done = true
+    end
+    if PV == 20 and CurrentWave == 4 and Level == 2 then
+        Missions[4].done = true
+    end
+    if PV == 20 and CurrentWave == 5 and Level == 3 then
+        Missions[4].done = true
+    end
+    if PV == 20 and CurrentWave == 5 and Level == 4 then
+        Missions[4].done = true
+    end
+end
+
+function AllMissionsCompleted()
+    for _, mission in ipairs(Missions) do
+        if not mission.done then
+            return false
+        end
+    end
+    return true
+end
+
+-- Convertir HSL (Hue, Saturation, Lightness) → RGB
+local function hslToRgb(h, s, l)
+    local function f(n)
+        local k = (n + h * 12) % 12
+        local a = s * math.min(l, 1 - l)
+        return l - a * math.max(-1, math.min(k - 3, 9 - k, 1))
+    end
+    return f(0), f(8), f(4)
+end
+
 function love.update(dt)
+    hue = (hue + speed * dt) % 1 -- boucle de 0 à 1
     if PV == 0 then
         return
+    end
+    if CurrentScreen == "Game" and not IsCreativeMode then
+        UpdateMissions()
     end
     if not Hello_Jeremy then
         PrincipalMusic:setVolume(VolumeOfMusic)
@@ -143,12 +204,12 @@ function love.update(dt)
             Money = Money - 0.1
         end
         if PV_Of_Boss <= 0 then -- Le boss est mort
-            Money = Money + 500 --Bug
-            TimeBeforeNextWave = 7
+            Money = Money + 440
             PV_Of_Boss = 80
             WinTheBoss = true
             Levels_Unlocked = Levels_Unlocked + 1
             Boss = false
+            Start_New_Wave()
         end
         if WinTheBoss then
             TimerOfVisible = TimerOfVisible - dt
@@ -167,17 +228,18 @@ function love.update(dt)
             AlertSound:play()
         end
 
-        if CurrentWave == 4 and Level == 3 then
+        if CurrentWave == 4 and Level == 3 or Level == 4 then
             MaxEnnemisPerWave = 0
             Boss = true
             AlertSound:play()
         end
-        local i = 1
-        while i <= #Enemis do
-            local ennemi = Enemis[i]
-            i = i + 1
+        if CurrentWave >= 0 and CurrentWave ~= 3 and Level == 2 or Level == 4 then --je sais c'est pas propre mais il y avait un bug tellement agaçant que je n'ai pas pu m'en empêcher...
+            Boss = false
         end
-
+        print("Nombre d'ennemis:" .. #Enemis)
+        print("Temps Avant la prochaine vague:" .. TimeBeforeNextWave)
+        print("Vague:" .. CurrentWave)
+        print(Boss)
         -- Ajouter des ennemis jusqu'à en avoir 7
         if not Boss then
             if #Enemis == 0 then
@@ -185,7 +247,7 @@ function love.update(dt)
                 TimeBeforeNextWave = TimeBeforeNextWave - dt
                 if math.ceil(TimeBeforeNextWave) <= 0 then
                     Start_New_Wave()
-                    if Level == 1 or Level == 3 then
+                    if Level == 1 or Level == 3 or Level == 4 then
                         while #Enemis < MaxEnnemisPerWave do
                             table.insert(Enemis, { y = Y_Of_Enemis, x = 700, s = 150 })
                             Y_Of_Enemis = Y_Of_Enemis + math.random(50, 85)
@@ -403,6 +465,7 @@ function love.update(dt)
                     if ball.type == "Bombe" then
                         if math.abs(ball.x - ennemi.x) <= 25 and math.abs(ball.y - ennemi.y) <= 150 then
                             table.remove(Ball, i)
+                            EnnemisKilled = EnnemisKilled + 1
                             table.remove(Enemis, j)
                             if not IsCreativeMode then
                                 Money = Money + 10
@@ -411,6 +474,7 @@ function love.update(dt)
                     else
                         if math.abs(ball.x - ennemi.x) <= 35 and math.abs(ball.y - ennemi.y) <= 25 then
                             table.remove(Ball, i)
+                            EnnemisKilled = EnnemisKilled + 1
                             table.remove(Enemis, j)
                             if not IsCreativeMode then
                                 Money = Money + 10
@@ -514,7 +578,7 @@ function love.mousepressed(x, y, button)
                             Mode = "Glace"
                         end
                     end
-                    if Within(750, 625, x, y, 150, 150) then --Bouton de la bombe
+                    if Within(750, 625, x, y, 150, 150) and Level ~= 4 then --Bouton de la bombe
                         if Money > 0 then
                             Mode = "Bombe"
                         end
@@ -547,6 +611,8 @@ function love.mousepressed(x, y, button)
                             PV_Of_Boss = 80
                         elseif Level == 3 then
                             PV_Of_Boss = 150
+                        elseif Level == 4 then
+                            PV_Of_Boss = 200
                         end
                         TimerOfVisible = 3
                         CooldownShoot = 6.5
@@ -579,7 +645,7 @@ function love.mousepressed(x, y, button)
                         elseif Level == 2 then
                             PV_Of_Boss = 80
                         elseif Level == 3 then
-                            PV_Of_Boss = 150
+                            PV_Of_Boss = 200
                         end
                         TimerOfVisible = 3
                         CooldownShoot = 6.5
@@ -651,7 +717,7 @@ function love.mousepressed(x, y, button)
                 -- Canon       : x = 350
                 -- Glace       : x = 550
                 -- Bombe       : x = 750
-                if Within(150, 625, x, y, 150, 150) then
+                if Within(150, 625, x, y, 150, 150) and Level ~= 4 then
                     if Money > 0 then
                         Mode = "Mitraillette"
                     end
@@ -662,7 +728,7 @@ function love.mousepressed(x, y, button)
                 if Within(550, 625, x, y, 150, 150) then
                     Mode = "Glace"
                 end
-                if Within(750, 625, x, y, 150, 150) then
+                if Within(750, 625, x, y, 150, 150) and Level ~= 4 then
                     Mode = "Bombe"
                 end
                 if Within(950, 625, x, y, 150, 150) then
@@ -727,7 +793,7 @@ function love.mousepressed(x, y, button)
                     elseif Level == 2 then
                         PV_Of_Boss = 80
                     elseif Level == 3 then
-                        PV_Of_Boss = 150
+                        PV_Of_Boss = 200
                     end
                     TimerOfVisible = 3
                     CooldownShoot = 6.5
@@ -739,6 +805,10 @@ function love.mousepressed(x, y, button)
                     HomeMusic:play()
                 elseif Within(10, 300, x, y, 400, 100) then
                     CurrentScreen = "Settings"
+                elseif Within(10, 700, x, y, 300, 100) then
+                    MissionsScreen = true
+                elseif not Within(1000, 225, x, y, 400, 600) and MissionsScreen == true then
+                    MissionsScreen = false
                 elseif VolumeOfEffects < 0.9 and CurrentScreen == "Settings" and Within(790, 300, x, y, 20, 20) then
                     VolumeOfEffects = VolumeOfEffects + 0.1
                 elseif VolumeOfMusic < 0.9 and CurrentScreen == "Settings" and Within(800, 500, x, y, 20, 20) then
@@ -749,6 +819,8 @@ function love.mousepressed(x, y, button)
                     Level = 2
                 elseif Within(500, 600, x, y, 200, 100) and CurrentScreen == "Levels" and Levels_Unlocked >= 3 then
                     Level = 3
+                elseif Within(1000, 600, x, y, 200, 100) and CurrentScreen == "Levels" and Levels_Unlocked >= 4 then
+                    Level = 4
                 end
             else
                 if Within(175, 350, x, y, 200, 100) then
@@ -785,17 +857,25 @@ end
 
 -- Fonction d'affichage
 function love.draw()
+    R, G, B = hslToRgb(hue, 1, 0.5) -- saturation 1, lumière 0.5
     if not Hello_Jeremy then
         if not Starting then
             --all rectangles
             if CurrentScreen == "Home" then
                 love.graphics.setBackgroundColor(1, 1, 1)
             elseif CurrentScreen == "Game" then
-                love.graphics.setBackgroundColor(0, 0, 0)
-                if Level == 2 then
-                    love.graphics.setBackgroundColor(0.89, 0.52, 0.22)
+                love.graphics.draw(BackgroundLevel1, 0, 0, 0, 2.1)
+                if Level == 1 then
+                    love.graphics.draw(BackgroundLevel1, 0, 0, 0, 2.1)
+                elseif Level == 2 then
+                    love.graphics.setBackgroundColor(0, 0, 0)
+                    love.graphics.draw(BackgroundLevel2, 0, 0, 0, 2.35)
                 elseif Level == 3 then
-                    love.graphics.setBackgroundColor(0.839, 0.945, 1)
+                    love.graphics.setBackgroundColor(0, 0, 0)
+                    love.graphics.draw(BackgroundLevel3, 0, 0, 0, 2.5)
+                elseif Level == 4 then
+                    love.graphics.setBackgroundColor(0, 0, 0)
+                    love.graphics.draw(BackgroundLevel4, 0, 0, 0, 1.5)
                 end
             elseif CurrentScreen == "Levels" then
                 if Levels_Unlocked >= 1 then
@@ -816,6 +896,13 @@ function love.draw()
                             love.graphics.rectangle("fill", 500, 600, 200, 100)
                             love.graphics.setColor(1, 1, 1)
                             love.graphics.print("Niveau3", 520, 620)
+                            if Levels_Unlocked >= 4 then
+                                love.graphics.setFont(Font)
+                                love.graphics.setColor(0, 1, 0)
+                                love.graphics.rectangle("fill", 1000, 600, 200, 100)
+                                love.graphics.setColor(1, 1, 1)
+                                love.graphics.print("Niveau4", 1020, 620)
+                            end
                         end
                     end
                 end
@@ -903,10 +990,10 @@ function love.draw()
                             love.graphics.setColor(1, 0, 0)
                             love.graphics.circle("fill", ennemi.x, ennemi.y, 25)
                         elseif Level == 3 then
-                            print("Ennemi.x:" .. ennemi.x)
-                            print("Ennemi.y:" .. ennemi.y)
-                            print("Nombre d'ennemis:" .. #Enemis)
                             love.graphics.setColor(0, 0, 1)
+                            love.graphics.circle("fill", ennemi.x, ennemi.y, 30)
+                        elseif Level == 4 then
+                            love.graphics.setColor(1, 0, 1)
                             love.graphics.circle("fill", ennemi.x, ennemi.y, 30)
                         end
                     end
@@ -943,7 +1030,11 @@ function love.draw()
                         love.graphics.setColor(0.5, 0, 1)
                     end
                     if not Within(600, 50, canon.x, canon.y, 200, 500) then
-                        love.graphics.rectangle("fill", canon.x - 25, canon.y - 25, 50, 50)
+                        if canon.m == "Bombe" or canon.m == "Mitraillette" or canon.m == "Canon" then
+                            love.graphics.draw(Heart, canon.x - 150, canon.y - 180, 0, 0.6)
+                        elseif canon.m == "Glace" or canon.m == "Téléporteur" then
+                            love.graphics.draw(Heart, canon.x + 150, canon.y + 180, 110, 0.6)
+                        end
                     end
                 end
                 if Boss then
@@ -1006,6 +1097,23 @@ function love.draw()
                 love.graphics.print("The official game of", 610, 10)
                 love.graphics.setFont(Font2)
                 love.graphics.print("   Tower Defense", -180, 50)
+                love.graphics.setFont(Font3)
+                love.graphics.setColor(0, 0, 0)
+                love.graphics.rectangle("fill", 10, 700, 300, 100)
+                love.graphics.setColor(0, 1, 0)
+                love.graphics.print("Missions", 70, 725)
+                if MissionsScreen == true then
+                    love.graphics.setColor(0, 0, 0)
+                    love.graphics.rectangle("fill", 1000, 225, 400, 600)
+                    love.graphics.setFont(Font)
+                    love.graphics.print("Missions", 50, 700)
+                    for i, mission in ipairs(Missions) do
+                        local status = mission.done and "[✓]" or "[ ]"
+                        love.graphics.setFont(FontMini)
+                        love.graphics.setColor(0, 1, 0)
+                        love.graphics.print(status .. " " .. mission.name, 1000, 250 + i * 100)
+                    end
+                end
             elseif CurrentScreen == "Settings" then
                 love.graphics.draw(HomeImage, 1200, 10, 0, 0.1, 0.1)
                 love.graphics.setFont(Font3)
@@ -1032,6 +1140,16 @@ function love.draw()
             end
             if PrintDebug then
                 print("TutorialScreen:" .. TutorialScreen)
+            end
+            if Level == 4 and CurrentWave == 1 then
+                love.graphics.setFont(FontMini)
+                love.graphics.setColor(1, 0, 0)
+                love.graphics.print("Bris mécanique:certaines tourelles sont surglucidés!", 30, 400)
+                love.graphics.setFont(Font2)
+                love.graphics.print("x", 150, 625)
+                love.graphics.print("x", 750, 625)
+                love.graphics.setFont(Font)
+                love.graphics.setColor(1, 1, 1)
             end
             if Tutorial and TutorialScreen == "1" then
                 CurrentScreen = "Home"
