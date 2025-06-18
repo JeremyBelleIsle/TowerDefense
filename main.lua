@@ -8,10 +8,37 @@ Enemis = {}
 Ball = {}
 BallGlace = {}
 Missions = {
-    { name = "Tuer 10 ennemis",        done = false },
-    { name = "Construire 5 tourelles", done = false },
-    { name = "Finir la vague 3",       done = false },
-    { name = "Ne perdre aucune vie",   done = false }
+    { name = "Tuer 10 ennemis:200T",                                  done = false },
+    { name = "Construire 5 tourelles:400T",                           done = false },
+    { name = "Finir la vague 3:500T",                                 done = false },
+    { name = "Ne perdre aucune vie:1500T",                            done = false },
+    { name = "Atteindre 10000$:3000T",                                done = false },
+    { name = "Débloquer le niveau 4:600T",                            done = false },
+    { name = "Ne pas poser de bombe ou de mitraillette:1000T",        done = false },
+    { name = "Gagner un niveau sans poser plus de 3 tourelles:2000T", done = false },
+    { name = "Avoir uniquement des tourelles canon ou glace:2100T",   done = false },
+    { name = "Terminer un niveau avec 1 PV restant:1300T",            done = false }
+}
+Recompenses = {
+    { name = "" },
+    { name = "Mini jeux" },
+    { name = "Musique Exclusive" },
+    { name = "Basketball" },
+    { name = "" },
+    { name = "" },
+    { name = "" },
+    { name = "" },
+    { name = "" },
+    { name = "" },
+    { name = "" },
+    { name = "" },
+    { name = "" },
+    { name = "" },
+    { name = "" },
+    { name = "" },
+}
+MG = {
+    { name = "Basketball" }
 }
 EnnemisKilled = 0
 Y_Of_Enemis = 800
@@ -41,9 +68,15 @@ TutorialScreen = "1"
 Code = ""
 Hello_Jeremy = false
 PrintDebug = false
+Mission7var2 = true
+Mission8 = false
+Mission9 = true
+ExclusiveMusictrueorfalse = false
 TimerOfStepOfEnemis = 3
-local hue = 0              -- de 0 à 1 (tourne autour du cercle chromatique)
-local speed = 0.2          -- vitesse de changement de couleur
+Trophee = 0
+T = 0
+XofPDT = 0
+YofMG = 0
 math.randomseed(os.time()) -- Truc qui sert à faire un nombre aléatoire à chaque fois que j'utilise math.random(x,x)
 CanonImage = love.graphics.newImage("Pixel Heart.png")
 Heart = love.graphics.newImage("Canon.png")
@@ -54,10 +87,12 @@ BackgroundLevel4 = love.graphics.newImage("Backgroundlevel4.png")
 BackgroundLevel3 = love.graphics.newImage("Backgroundlevel3.jpg")
 BackgroundLevel2 = love.graphics.newImage("Backgroundlevel2.jpg")
 BackgroundLevel1 = love.graphics.newImage("Backgroundlevel1.jpg")
+TropheeImage = love.graphics.newImage("trophée.png")
 ShootSound = love.audio.newSource("assets/mixkit-short-laser-gun-shot-1670.wav", "stream")
 GameOverSound = love.audio.newSource("assets/mixkit-sad-game-over-trombone-471.wav", "stream")
 BuzzSound = love.audio.newSource("assets/mixkit-wrong-electricity-buzz-955.wav", "stream")
 PrincipalMusic = love.audio.newSource("assets/mixkit-games-music-706.mp3", "stream")
+ExclusiveMusic = love.audio.newSource("assets/Exclusive music.mp3", "stream")
 AlertSound = love.audio.newSource("assets/mixkit-signal-alert-771.wav", "stream")
 HomeMusic = love.audio.newSource(
     "assets/One Man Symphony - In The Blink Of An Eye (Free) - 04 In The Blink Of An Eye (Action 04).mp3", "stream")
@@ -65,6 +100,7 @@ VolumeOfEffects = 0.5
 VolumeOfMusic = 0.7
 PrincipalMusic:setVolume(VolumeOfMusic) -- Volume entre 0.0 (muet) et 1.0 (volume max)
 HomeMusic:setVolume(VolumeOfMusic)
+ExclusiveMusic:setVolume(VolumeOfMusic)
 ShootSound:setVolume(VolumeOfEffects)
 GameOverSound:setVolume(VolumeOfEffects)
 BuzzSound:setVolume(VolumeOfEffects)
@@ -140,26 +176,61 @@ function Start_New_Wave()
 end
 
 function UpdateMissions()
-    if EnnemisKilled >= 10 then
+    if EnnemisKilled >= 10 and Missions[1].done == false then
         Missions[1].done = true
+        Trophee = Trophee + 200
     end
-    if #Object >= 5 then
+    if #Object >= 5 and Missions[2].done == false then
         Missions[2].done = true
+        Trophee = Trophee + 400
     end
-    if CurrentWave == 4 then
+    if CurrentWave == 4 and Missions[3].done == false then
         Missions[3].done = true
+        Trophee = Trophee + 500
     end
-    if PV == 20 and CurrentWave == 4 and Level == 1 then
+    if PV == 20 and CurrentWave == 4 and Level == 1 and Missions[4].done == false then
         Missions[4].done = true
+        Trophee = Trophee + 1500
     end
-    if PV == 20 and CurrentWave == 4 and Level == 2 then
+    if PV == 20 and CurrentWave == 4 and Level == 2 and Missions[4].done == false then
         Missions[4].done = true
+        Trophee = Trophee + 1500
     end
-    if PV == 20 and CurrentWave == 5 and Level == 3 then
+    if PV == 20 and CurrentWave == 5 and Level == 3 and Missions[4].done == false then
         Missions[4].done = true
+        Trophee = Trophee + 1500
     end
-    if PV == 20 and CurrentWave == 5 and Level == 4 then
+    if PV == 20 and CurrentWave == 5 and Level == 4 and Missions[4].done == false then
         Missions[4].done = true
+        Trophee = Trophee + 1500
+    end
+    if Money == 10000 and Missions[5].done == false then
+        Missions[5].done = true
+        Trophee = Trophee + 3000
+    end
+    if Levels_Unlocked >= 4 and Missions[6].done == false then
+        Missions[6].done = true
+        Trophee = Trophee + 600
+    end
+    if Mission7var2 and CurrentWave == 4 and Missions[7].done == false then
+        Missions[7].done = true
+        Trophee = Trophee + 1000
+    end
+    if Mission8 and CurrentWave == 4 and Missions[8].done == false then
+        Missions[8].done = true
+        Trophee = Trophee + 500
+    end
+    if Mission9 and CurrentWave == 4 and Missions[9].done == false then
+        Missions[9].done = true
+        Trophee = Trophee + 2100
+    end
+    if PV == 1 and CurrentWave == 4 and Level == 1 and Missions[10].done == false or PV == 1 and CurrentWave == 4 and Level == 2 and Missions[10].done == false then
+        Missions[10].done = true
+        Trophee = Trophee + 1300
+    end
+    if PV == 1 and CurrentWave == 5 and Level == 3 and Missions[10].done == false or PV == 1 and CurrentWave == 4 and Level == 4 and Missions[10].done == false then
+        Missions[10].done = true
+        Trophee = Trophee + 1300
     end
 end
 
@@ -172,27 +243,35 @@ function AllMissionsCompleted()
     return true
 end
 
--- Convertir HSL (Hue, Saturation, Lightness) → RGB
-local function hslToRgb(h, s, l)
-    local function f(n)
-        local k = (n + h * 12) % 12
-        local a = s * math.min(l, 1 - l)
-        return l - a * math.max(-1, math.min(k - 3, 9 - k, 1))
-    end
-    return f(0), f(8), f(4)
-end
-
 function love.update(dt)
-    hue = (hue + speed * dt) % 1 -- boucle de 0 à 1
+    if #Object <= 3 then
+        Mission8 = true
+    end
+    T = T + dt
     if PV == 0 then
         return
     end
     if CurrentScreen == "Game" and not IsCreativeMode then
         UpdateMissions()
     end
+    if CurrentScreen == "Palais des trophée" then
+        if love.keyboard.isDown("right") then
+            XofPDT = XofPDT - 35
+        elseif love.keyboard.isDown("left") then
+            XofPDT = XofPDT + 35
+        end
+    end
+    if CurrentScreen == "MiniGames" then
+        if love.keyboard.isDown("up") then
+            YofMG = YofMG - 20
+        elseif love.keyboard.isDown("down") then
+            YofMG = YofMG + 20
+        end
+    end
     if not Hello_Jeremy then
         PrincipalMusic:setVolume(VolumeOfMusic)
         HomeMusic:setVolume(VolumeOfMusic)
+        ExclusiveMusic:setVolume(VolumeOfMusic)
         ShootSound:setVolume(VolumeOfEffects)
         GameOverSound:setVolume(VolumeOfEffects)
         BuzzSound:setVolume(VolumeOfEffects)
@@ -586,7 +665,12 @@ function love.mousepressed(x, y, button)
                     if Within(550, 300, x, y, 300, 100) and CurrentScreen == "Home" and not Tutorial then
                         HomeMusic:stop()
                         CurrentScreen = "Game"
-                        PrincipalMusic:play()
+                        Mission7var2 = true
+                        if not ExclusiveMusictrueorfalse then
+                            PrincipalMusic:play()
+                        else
+                            ExclusiveMusic:play()
+                        end
                         Object = {}
                         Enemis = {}
                         Ball = {}
@@ -620,8 +704,13 @@ function love.mousepressed(x, y, button)
                         love.graphics.setFont(Font)
                     elseif Within(550, 500, x, y, 300, 100) and CurrentScreen == "Home" and not Tutorial then
                         CurrentScreen = "Game"
+                        Mission7var2 = true
                         HomeMusic:stop()
-                        PrincipalMusic:play()
+                        if not ExclusiveMusictrueorfalse then
+                            PrincipalMusic:play()
+                        else
+                            ExclusiveMusic:play()
+                        end
                         Object = {}
                         Enemis = {}
                         Ball = {}
@@ -683,6 +772,8 @@ function love.mousepressed(x, y, button)
                             end
                         elseif Mode == "Mitraillette" then
                             if Money - 175 >= 0 and CurrentScreen == "Game" then
+                                Mission9 = false
+                                Mission7var2 = false
                                 Money = Money - 175
                                 table.insert(Object, { x = x, y = y, m = Mode })
                             elseif CurrentScreen == "Game" then
@@ -691,6 +782,8 @@ function love.mousepressed(x, y, button)
                             end
                         elseif Mode == "Bombe" then
                             if Money - 225 >= 0 and CurrentScreen == "Game" then
+                                Mission9 = false
+                                Mission7var2 = false
                                 Money = Money - 225
                                 table.insert(Object, { x = x, y = y, m = Mode })
                             elseif CurrentScreen == "Game" then
@@ -699,6 +792,7 @@ function love.mousepressed(x, y, button)
                             end
                         elseif Mode == "Téléporteur" then
                             if Money - 125 >= 0 and CurrentScreen == "Game" then
+                                Mission9 = false
                                 Money = Money - 125
                                 table.insert(Object, { x = x, y = y, m = Mode })
                             elseif CurrentScreen == "Game" then
@@ -807,12 +901,16 @@ function love.mousepressed(x, y, button)
                     CurrentScreen = "Settings"
                 elseif Within(10, 700, x, y, 300, 100) then
                     MissionsScreen = true
-                elseif not Within(1000, 225, x, y, 400, 600) and MissionsScreen == true then
+                elseif not Within(500, 225, x, y, 1000, 600) and MissionsScreen == true then
                     MissionsScreen = false
                 elseif VolumeOfEffects < 0.9 and CurrentScreen == "Settings" and Within(790, 300, x, y, 20, 20) then
                     VolumeOfEffects = VolumeOfEffects + 0.1
                 elseif VolumeOfMusic < 0.9 and CurrentScreen == "Settings" and Within(800, 500, x, y, 20, 20) then
                     VolumeOfMusic = VolumeOfMusic + 0.1
+                elseif CurrentScreen == "Settings" and Within(10, 350, x, y, 200, 100) and Trophee >= 3000 then
+                    ExclusiveMusictrueorfalse = true
+                elseif CurrentScreen == "Settings" and Within(10, 500, x, y, 200, 100) then
+                    ExclusiveMusictrueorfalse = false
                 elseif Within(500, 300, x, y, 200, 100) and CurrentScreen == "Levels" then
                     Level = 1
                 elseif Within(1000, 300, x, y, 200, 100) and CurrentScreen == "Levels" and Levels_Unlocked >= 2 then
@@ -821,6 +919,10 @@ function love.mousepressed(x, y, button)
                     Level = 3
                 elseif Within(1000, 600, x, y, 200, 100) and CurrentScreen == "Levels" and Levels_Unlocked >= 4 then
                     Level = 4
+                elseif Within(100, 100, x, y, 200, 100) and CurrentScreen == "Palais des trophée" and Trophee >= 0 then                  --pas 0:2000
+                    CurrentScreen = "MiniGames"
+                elseif Within(200, 400 + YofMG, x, y, 1100, 200 + YofMG) and CurrentScreen == "Palais des trophée" and Trophee >= 0 then --pas 0:2000
+                    CurrentScreen = "MiniGames1"
                 end
             else
                 if Within(175, 350, x, y, 200, 100) then
@@ -831,6 +933,10 @@ function love.mousepressed(x, y, button)
                     Tutorial = true
                     CurrentScreen = "Home"
                 end
+            end
+
+            if Within(10, 440, x, y, 300, 50) and CurrentScreen == "Home" and not Tutorial then
+                CurrentScreen = "Palais des trophée"
             end
         elseif button == 2 then
             if not Starting then
@@ -857,7 +963,6 @@ end
 
 -- Fonction d'affichage
 function love.draw()
-    R, G, B = hslToRgb(hue, 1, 0.5) -- saturation 1, lumière 0.5
     if not Hello_Jeremy then
         if not Starting then
             --all rectangles
@@ -877,6 +982,34 @@ function love.draw()
                     love.graphics.setBackgroundColor(0, 0, 0)
                     love.graphics.draw(BackgroundLevel4, 0, 0, 0, 1.5)
                 end
+            elseif CurrentScreen == "Palais des trophée" then
+                love.graphics.setBackgroundColor(0, 0, 0)
+                love.graphics.setColor(1, 1, 1)
+                if Trophee >= 0 then --pas 0:2000
+                    love.graphics.rectangle("fill", 100, 100, 200, 50)
+                    love.graphics.setColor(0, 1, 0)
+                    love.graphics.setFont(Font)
+                    love.graphics.print("Minijeux", 110, 110)
+                end
+                love.graphics.setFont(Font)
+                love.graphics.setColor(1, 1, 1)
+                love.graphics.line(0, 400, 1500, 400)
+                for i = 1, 10, 1 do
+                    love.graphics.line(300 * i + XofPDT, 325, 300 * i + XofPDT, 475)
+                    love.graphics.print(Recompenses[i].name, i * 300 - 70 + XofPDT, 500)
+                    love.graphics.print(i * 1000 .. " Trophées", 300 * i - 30 + XofPDT, 300)
+                end
+            elseif CurrentScreen == "MiniGames" then
+                love.graphics.setBackgroundColor(math.sin(T), 1, math.cos(T))
+                for i = 1, #MG, 1 do
+                    love.graphics.setColor(1, 0, 0)
+                    love.graphics.setFont(Font2)
+                    love.graphics.rectangle("fill", 200, 400 * i + YofMG, 1100, 300 * i - 100)
+                    love.graphics.setColor(0, 0, 0)
+                    love.graphics.print(MG[i].name, 250, 300 * i + 100 + YofMG)
+                end
+            elseif CurrentScreen == "MiniGames1" then
+                love.graphics.setBackgroundColor(1, 1, 1)
             elseif CurrentScreen == "Levels" then
                 if Levels_Unlocked >= 1 then
                     love.graphics.setFont(Font)
@@ -909,7 +1042,11 @@ function love.draw()
             end
             if CurrentScreen == "Game" then
                 HomeMusic:stop()
-                PrincipalMusic:play()
+                if not ExclusiveMusictrueorfalse then
+                    PrincipalMusic:play()
+                else
+                    ExclusiveMusic:play()
+                end
                 love.graphics.setColor(1, 1, 1)
                 love.graphics.rectangle("fill", 1200, 10, 100, 100)
                 love.graphics.draw(HomeImage, 1200, 10, 0, 0.1, 0.1)
@@ -1071,6 +1208,7 @@ function love.draw()
             elseif CurrentScreen == "Levels" then
                 love.graphics.draw(HomeImage, 1200, 10, 0, 0.1, 0.1)
             elseif CurrentScreen == "Home" then
+                ExclusiveMusic:stop()
                 PrincipalMusic:stop()
                 HomeMusic:play()
                 love.graphics.setColor(0, 0, 0)
@@ -1102,16 +1240,28 @@ function love.draw()
                 love.graphics.rectangle("fill", 10, 700, 300, 100)
                 love.graphics.setColor(0, 1, 0)
                 love.graphics.print("Missions", 70, 725)
+                love.graphics.setColor(0, 0, 0)
+                love.graphics.rectangle("fill", 10, 500, 400, 125)
+                love.graphics.setColor(0, 1, 0)
+                if Trophee >= 10000 then
+                    love.graphics.setColor(math.sin(T), 1, math.cos(T))
+                end
+                love.graphics.print("Trophées", 70, 515)
+                love.graphics.print(Trophee, 70, 560)
+                love.graphics.rectangle("fill", 10, 440, 300, 50)
+                love.graphics.setFont(FontMini)
+                love.graphics.setColor(0, 0, 0)
+                love.graphics.print("Palais des trophée", 40, 450)
                 if MissionsScreen == true then
                     love.graphics.setColor(0, 0, 0)
-                    love.graphics.rectangle("fill", 1000, 225, 400, 600)
+                    love.graphics.rectangle("fill", 500, 225, 1000, 600)
                     love.graphics.setFont(Font)
                     love.graphics.print("Missions", 50, 700)
                     for i, mission in ipairs(Missions) do
                         local status = mission.done and "[✓]" or "[ ]"
                         love.graphics.setFont(FontMini)
                         love.graphics.setColor(0, 1, 0)
-                        love.graphics.print(status .. " " .. mission.name, 1000, 250 + i * 100)
+                        love.graphics.print(status .. " " .. mission.name, 500, 200 + i * 30)
                     end
                 end
             elseif CurrentScreen == "Settings" then
@@ -1130,14 +1280,24 @@ function love.draw()
                 love.graphics.print("-", 700, 475)
                 love.graphics.setFont(FontMini)
                 love.graphics.print("+", 797, 493)
-            end
-            if CurrentScreen == "Settings" then
-                love.graphics.setFont(FontMini)
+                if Trophee >= 3000 then
+                    love.graphics.setColor(0, 0, 0)
+                    love.graphics.rectangle("fill", 10, 350, 500, 100)
+                    love.graphics.setColor(math.sin(T), 1, math.cos(T))
+                    love.graphics.setFont(Font)
+                    love.graphics.print("Musique exclusive", 50, 390)
+                    love.graphics.setColor(0, 0, 0)
+                    love.graphics.rectangle("fill", 10, 500, 500, 100)
+                    love.graphics.setColor(1, 1, 1)
+                    love.graphics.print("Musique normale", 50, 550)
+                end
+                love.graphics.setColor(0, 0, 0)
                 love.graphics.print(
                     "VolumeOfEffects" .. ":" .. VolumeOfEffects .. "VolumeOfMusic" .. ":" .. VolumeOfMusic,
                     300,
                     100) --debug
             end
+
             if PrintDebug then
                 print("TutorialScreen:" .. TutorialScreen)
             end
@@ -1193,6 +1353,7 @@ function love.draw()
                 love.graphics.setColor(0, 1, 0)
             elseif TutorialScreen == "6" and PV > 0 then
                 CurrentScreen = "Game"
+                Mission7var2 = true
                 love.graphics.setColor(1, 0, 0, 0.5)
                 love.graphics.rectangle("fill", 0, 0, 600, 600)
                 love.graphics.setColor(1, 0, 0)
@@ -1231,6 +1392,7 @@ function love.draw()
         end
     elseif Hello_Jeremy then
         love.graphics.setFont(Font)
+        ExclusiveMusic:stop()
         PrincipalMusic:stop()
         HomeMusic:stop()
         love.graphics.setColor(1, 1, 1)
@@ -1255,3 +1417,4 @@ end
 --erreurs
 --Détecter le clic sur le bouton Mode Creatif et jouer dans menu
 --aucune erreurs😁
+--pas 0:2000
