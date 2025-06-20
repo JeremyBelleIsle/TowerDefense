@@ -3,114 +3,127 @@ if arg[2] == "debug" then
     lldebugger = require("lldebugger")
     lldebugger.start()
 end
-Object = {}
-Enemis = {}
-Ball = {}
-BallGlace = {}
-Missions = {
-    { name = "Tuer 10 ennemis:200T",                                  done = false },
-    { name = "Construire 5 tourelles:400T",                           done = false },
-    { name = "Finir la vague 3:500T",                                 done = false },
-    { name = "Ne perdre aucune vie:1500T",                            done = false },
-    { name = "Atteindre 10000$:3000T",                                done = false },
-    { name = "Débloquer le niveau 4:600T",                            done = false },
-    { name = "Ne pas poser de bombe ou de mitraillette:1000T",        done = false },
-    { name = "Gagner un niveau sans poser plus de 3 tourelles:2000T", done = false },
-    { name = "Avoir uniquement des tourelles canon ou glace:2100T",   done = false },
-    { name = "Terminer un niveau avec 1 PV restant:1300T",            done = false }
-}
-Recompenses = {
-    { name = "" },
-    { name = "Mini jeux" },
-    { name = "Musique Exclusive" },
-    { name = "Basketball" },
-    { name = "" },
-    { name = "" },
-    { name = "" },
-    { name = "" },
-    { name = "" },
-    { name = "" },
-    { name = "" },
-    { name = "" },
-    { name = "" },
-    { name = "" },
-    { name = "" },
-    { name = "" },
-}
-MG = {
-    { name = "Basketball" }
-}
-EnnemisKilled = 0
-Y_Of_Enemis = 800
-Money = 200
-PV = 20
-SpeedOfEnemis = 150
-IsCreativeMode = false
-Mode = "Canon"
-CurrentWave = 0
-WaveInProgress = false
-TimeBeforeNextWave = 5
-MaxEnnemisPerWave = 10
-Boss = false
-WinTheBoss = false
-XofBoss = 700
-YofBoss = 700
-PV_Of_Boss = 40
-TimerOfVisible = 3
-CooldownShoot = 6.5
-BossisFrezzing = false
-CurrentScreen = "Home"
-Levels_Unlocked = 1
-Level = 1
-Starting = true
-Size_Of_Finger = 0.08
-TutorialScreen = "1"
-Code = ""
-Hello_Jeremy = false
-PrintDebug = false
-Mission7var2 = true
-Mission8 = false
-Mission9 = true
-ExclusiveMusictrueorfalse = false
-TimerOfStepOfEnemis = 3
-Trophee = 0
-T = 0
-XofPDT = 0
-YofMG = 0
-math.randomseed(os.time()) -- Truc qui sert à faire un nombre aléatoire à chaque fois que j'utilise math.random(x,x)
-CanonImage = love.graphics.newImage("Pixel Heart.png")
-Heart = love.graphics.newImage("Canon.png")
-HomeImage = love.graphics.newImage("Home.png")
-CadenasImage = love.graphics.newImage("Cadenas.png")
-FingerImage = love.graphics.newImage("Finger Pointing.png")
-BackgroundLevel4 = love.graphics.newImage("Backgroundlevel4.png")
-BackgroundLevel3 = love.graphics.newImage("Backgroundlevel3.jpg")
-BackgroundLevel2 = love.graphics.newImage("Backgroundlevel2.jpg")
-BackgroundLevel1 = love.graphics.newImage("Backgroundlevel1.jpg")
-TropheeImage = love.graphics.newImage("trophée.png")
-ShootSound = love.audio.newSource("assets/mixkit-short-laser-gun-shot-1670.wav", "stream")
-GameOverSound = love.audio.newSource("assets/mixkit-sad-game-over-trombone-471.wav", "stream")
-BuzzSound = love.audio.newSource("assets/mixkit-wrong-electricity-buzz-955.wav", "stream")
-PrincipalMusic = love.audio.newSource("assets/mixkit-games-music-706.mp3", "stream")
-ExclusiveMusic = love.audio.newSource("assets/Exclusive music.mp3", "stream")
-AlertSound = love.audio.newSource("assets/mixkit-signal-alert-771.wav", "stream")
-HomeMusic = love.audio.newSource(
-    "assets/One Man Symphony - In The Blink Of An Eye (Free) - 04 In The Blink Of An Eye (Action 04).mp3", "stream")
-VolumeOfEffects = 0.5
-VolumeOfMusic = 0.7
-PrincipalMusic:setVolume(VolumeOfMusic) -- Volume entre 0.0 (muet) et 1.0 (volume max)
-HomeMusic:setVolume(VolumeOfMusic)
-ExclusiveMusic:setVolume(VolumeOfMusic)
-ShootSound:setVolume(VolumeOfEffects)
-GameOverSound:setVolume(VolumeOfEffects)
-BuzzSound:setVolume(VolumeOfEffects)
-AlertSound:setVolume(VolumeOfEffects)
-HomeMusic:play()
-Font = love.graphics.newFont(35)     -- 35 est la taille en pixels
-Font2 = love.graphics.newFont(200)   -- 200 est la taille en pixels
-Font3 = love.graphics.newFont(55)    -- 50 est la taille en pixels
-FontMini = love.graphics.newFont(28) -- 28 est la taille en pixels
-love.graphics.setFont(Font)
+function love.load()
+    Object = {}
+    Enemis = {}
+    Ball = {}
+    BallGlace = {}
+    Missions = {
+        { name = "Tuer 10 ennemis:200T",                                  done = false },
+        { name = "Construire 5 tourelles:400T",                           done = false },
+        { name = "Finir la vague 3:500T",                                 done = false },
+        { name = "Ne perdre aucune vie:1500T",                            done = false },
+        { name = "Atteindre 10000$:3000T",                                done = false },
+        { name = "Débloquer le niveau 4:600T",                            done = false },
+        { name = "Ne pas poser de bombe ou de mitraillette:1000T",        done = false },
+        { name = "Gagner un niveau sans poser plus de 3 tourelles:2000T", done = false },
+        { name = "Avoir uniquement des tourelles canon ou glace:2100T",   done = false },
+        { name = "Terminer un niveau avec 1 PV restant:1300T",            done = false }
+    }
+    Recompenses = {
+        { name = "" },
+        { name = "Mini jeux" },
+        { name = "Musique Exclusive" },
+        { name = "Basketball" },
+        { name = "" },
+        { name = "" },
+        { name = "" },
+        { name = "" },
+        { name = "" },
+        { name = "" },
+        { name = "" },
+        { name = "" },
+        { name = "" },
+        { name = "" },
+        { name = "" },
+        { name = "" },
+    }
+    MG = {
+        { name = "Basketball" }
+    }
+    EnnemisKilled = 0
+    Y_Of_Enemis = 800
+    Money = 200
+    PV = 20
+    SpeedOfEnemis = 150
+    IsCreativeMode = false
+    Mode = "Canon"
+    CurrentWave = 0
+    WaveInProgress = false
+    TimeBeforeNextWave = 5
+    MaxEnnemisPerWave = 10
+    Boss = false
+    WinTheBoss = false
+    XofBoss = 700
+    YofBoss = 700
+    PV_Of_Boss = 40
+    TimerOfVisible = 3
+    CooldownShoot = 6.5
+    BossisFrezzing = false
+    CurrentScreen = "Home"
+    Levels_Unlocked = 1
+    Level = 1
+    Starting = true
+    Size_Of_Finger = 0.08
+    TutorialScreen = "1"
+    Code = ""
+    Hello_Jeremy = false
+    PrintDebug = false
+    Mission7var2 = true
+    Mission8 = false
+    Mission9 = true
+    ExclusiveMusictrueorfalse = false
+    TimerOfStepOfEnemis = 3
+    Trophee = 0
+    T = 0
+    XofPDT = 0
+    YofMG = 0
+    XofNet = 80
+    Yofbasketball = 150
+    BasketballShoot = false
+    --Victory variables
+    Victory = false
+    VictoryTimer = 0
+    VictoryFontSize = 20
+    Confetti = {}
+    VictoryDuration = 5        -- seconds
+    math.randomseed(os.time()) -- Truc qui sert à faire un nombre aléatoire à chaque fois que j'utilise math.random(x,x)
+    CanonImage = love.graphics.newImage("Pixel Heart.png")
+    Heart = love.graphics.newImage("Canon.png")
+    HomeImage = love.graphics.newImage("Home.png")
+    CadenasImage = love.graphics.newImage("Cadenas.png")
+    FingerImage = love.graphics.newImage("Finger Pointing.png")
+    BackgroundLevel4 = love.graphics.newImage("Backgroundlevel4.png")
+    BackgroundLevel3 = love.graphics.newImage("Backgroundlevel3.jpg")
+    BackgroundLevel2 = love.graphics.newImage("Backgroundlevel2.jpg")
+    BackgroundLevel1 = love.graphics.newImage("Backgroundlevel1.jpg")
+    TropheeImage = love.graphics.newImage("trophée.png")
+    BasketballImage = love.graphics.newImage("Basketball.png")
+    NetImage = love.graphics.newImage("Net.png")
+    ShootSound = love.audio.newSource("assets/mixkit-short-laser-gun-shot-1670.wav", "stream")
+    GameOverSound = love.audio.newSource("assets/mixkit-sad-game-over-trombone-471.wav", "stream")
+    BuzzSound = love.audio.newSource("assets/mixkit-wrong-electricity-buzz-955.wav", "stream")
+    PrincipalMusic = love.audio.newSource("assets/mixkit-games-music-706.mp3", "stream")
+    ExclusiveMusic = love.audio.newSource("assets/Exclusive music.mp3", "stream")
+    AlertSound = love.audio.newSource("assets/mixkit-signal-alert-771.wav", "stream")
+    HomeMusic = love.audio.newSource(
+        "assets/One Man Symphony - In The Blink Of An Eye (Free) - 04 In The Blink Of An Eye (Action 04).mp3", "stream")
+    VolumeOfEffects = 0.5
+    VolumeOfMusic = 0.7
+    PrincipalMusic:setVolume(VolumeOfMusic) -- Volume entre 0.0 (muet) et 1.0 (volume max)
+    HomeMusic:setVolume(VolumeOfMusic)
+    ExclusiveMusic:setVolume(VolumeOfMusic)
+    ShootSound:setVolume(VolumeOfEffects)
+    GameOverSound:setVolume(VolumeOfEffects)
+    BuzzSound:setVolume(VolumeOfEffects)
+    AlertSound:setVolume(VolumeOfEffects)
+    HomeMusic:play()
+    Font = love.graphics.newFont(35)     -- 35 est la taille en pixels
+    Font2 = love.graphics.newFont(200)   -- 200 est la taille en pixels
+    Font3 = love.graphics.newFont(55)    -- 50 est la taille en pixels
+    FontMini = love.graphics.newFont(28) -- 28 est la taille en pixels
+    love.graphics.setFont(Font)
+end
 
 function Within(SelfX, SelfY, x, y, w, h)
     return x > SelfX and x < (SelfX + w) and
@@ -243,13 +256,78 @@ function AllMissionsCompleted()
     return true
 end
 
+function TriggerVictory()
+    Victory = true
+    VictoryTimer = 0
+    VictoryFontSize = 20
+    Confetti = {}
+    for i = 1, 100 do
+        table.insert(Confetti, {
+            x = math.random(0, 1500),
+            y = math.random(-800, 0),
+            speed = math.random(100, 300),
+            color = { math.random(), math.random(), math.random() }
+        })
+    end
+end
+
 function love.update(dt)
+    if VictoryTimer >= VictoryDuration then
+        Victory = false
+    end
+    if Victory then
+        VictoryTimer = VictoryTimer + dt
+        VictoryFontSize = 20 + math.sin(VictoryTimer * 5) * 10
+
+        for _, confetti in ipairs(Confetti) do
+            confetti.y = confetti.y + confetti.speed * dt
+            if confetti.y > 800 then
+                confetti.y = -math.random(50, 200)
+                confetti.x = math.random(0, 1500)
+            end
+        end
+
+        -- End the victory animation after the duration
+        if VictoryTimer >= VictoryDuration then
+            Victory = false
+        end
+    end
     if #Object <= 3 then
         Mission8 = true
     end
     T = T + dt
     if PV == 0 then
         return
+    end
+    if CurrentScreen == "MiniGames1" then
+        if not BasketballShoot and XofNet <= 100 then
+            PON = 1
+        elseif not BasketballShoot and XofNet >= 1400 then
+            PON = 2
+        elseif BasketballShoot then
+            PON = 3
+        end
+        if PON == 1 then
+            XofNet = XofNet + 23
+        elseif PON == 2 then
+            XofNet = XofNet - 23
+        elseif PON == 3 then
+            Yofbasketball = Yofbasketball + 20
+            if Yofbasketball >= 725 and XofNet >= 450 and XofNet <= 550 then
+                PON = 1
+                CurrentScreen = "Palais des trophée"
+                Yofbasketball = 150
+                XofNet = 80
+                BasketballShoot = false
+                TriggerVictory()
+            elseif Yofbasketball >= 800 then
+                PON = 1
+                CurrentScreen = "Palais des trophée"
+                Yofbasketball = 150
+                XofNet = 80
+                BasketballShoot = false
+            end
+        end
     end
     if CurrentScreen == "Game" and not IsCreativeMode then
         UpdateMissions()
@@ -315,10 +393,6 @@ function love.update(dt)
         if CurrentWave >= 0 and CurrentWave ~= 3 and Level == 2 or Level == 4 then --je sais c'est pas propre mais il y avait un bug tellement agaçant que je n'ai pas pu m'en empêcher...
             Boss = false
         end
-        print("Nombre d'ennemis:" .. #Enemis)
-        print("Temps Avant la prochaine vague:" .. TimeBeforeNextWave)
-        print("Vague:" .. CurrentWave)
-        print(Boss)
         -- Ajouter des ennemis jusqu'à en avoir 7
         if not Boss then
             if #Enemis == 0 then
@@ -647,6 +721,10 @@ function love.mousepressed(x, y, button)
     end
     if not Hello_Jeremy then
         if button == 1 then
+            print("XofNet:" .. XofNet)
+            if CurrentScreen == "MiniGames1" then
+                BasketballShoot = true
+            end
             if PrintDebug then
                 print("Starting:" .. tostring(Starting))
             end
@@ -897,7 +975,7 @@ function love.mousepressed(x, y, button)
                 if Within(1200, 10, x, y, 100, 100) then
                     CurrentScreen = "Home"
                     HomeMusic:play()
-                elseif Within(10, 300, x, y, 400, 100) then
+                elseif Within(10, 300, x, y, 400, 100) and CurrentScreen == "Home" then
                     CurrentScreen = "Settings"
                 elseif Within(10, 700, x, y, 300, 100) then
                     MissionsScreen = true
@@ -919,9 +997,9 @@ function love.mousepressed(x, y, button)
                     Level = 3
                 elseif Within(1000, 600, x, y, 200, 100) and CurrentScreen == "Levels" and Levels_Unlocked >= 4 then
                     Level = 4
-                elseif Within(100, 100, x, y, 200, 100) and CurrentScreen == "Palais des trophée" and Trophee >= 0 then                  --pas 0:2000
+                elseif Within(100, 100, x, y, 200, 100) and CurrentScreen == "Palais des trophée" and Trophee >= 0 then --pas 0:2000
                     CurrentScreen = "MiniGames"
-                elseif Within(200, 400 + YofMG, x, y, 1100, 200 + YofMG) and CurrentScreen == "Palais des trophée" and Trophee >= 0 then --pas 0:2000
+                elseif Within(200, 400 + YofMG, x, y, 1100, 200) and CurrentScreen == "MiniGames" and Trophee >= 0 then --pas 0:2000
                     CurrentScreen = "MiniGames1"
                 end
             else
@@ -1010,6 +1088,9 @@ function love.draw()
                 end
             elseif CurrentScreen == "MiniGames1" then
                 love.graphics.setBackgroundColor(1, 1, 1)
+                love.graphics.setColor(1, 1, 1)
+                love.graphics.draw(BasketballImage, 675, Yofbasketball, 0, 0.07)
+                love.graphics.draw(NetImage, XofNet, 600, 0, 0.2)
             elseif CurrentScreen == "Levels" then
                 if Levels_Unlocked >= 1 then
                     love.graphics.setFont(Font)
@@ -1401,6 +1482,17 @@ function love.draw()
         love.graphics.print(
             "1.Have 10000$    2.Have 150PV    3.Exit out secret room    4.Activate_Debug    5.Desactive_Debug", 30, 500)
         love.graphics.print("6.UnlockedAllLevels", 30, 550)
+    end
+    if Victory then
+        for _, confetti in ipairs(Confetti) do
+            love.graphics.setColor(confetti.color)
+            love.graphics.rectangle("fill", confetti.x, confetti.y, 5, 10)
+        end
+
+        love.graphics.setColor(1, 1, 0)
+        love.graphics.setFont(love.graphics.newFont(VictoryFontSize))
+        love.graphics.printf("VICTORY!", 0, 300, 1500, "center")
+        love.graphics.setFont(Font) -- Reset your custom font
     end
 end
 
