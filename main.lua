@@ -74,7 +74,7 @@ function love.load()
     Mission9 = true
     ExclusiveMusictrueorfalse = false
     TimerOfStepOfEnemis = 3
-    Trophee = 0
+    Trophee = 4000
     T = 0
     XofPDT = 0
     YofMG = 0
@@ -309,7 +309,8 @@ function love.update(dt)
             PON = 1
         elseif not BasketballShoot and XofNet >= 1400 then
             PON = 2
-        elseif BasketballShoot then
+        end
+        if BasketballShoot then
             PON = 3
         end
         if PON == 1 then
@@ -1292,6 +1293,8 @@ function love.draw()
                     love.graphics.print("Retry", 400, 400)
                 end
             elseif CurrentScreen == "Levels" or CurrentScreen == "MiniGames" or CurrentScreen == "Palais des trophée" then
+                love.graphics.setColor(1, 1, 1)
+                love.graphics.rectangle("fill", 1200, 10, 100, 100)
                 love.graphics.draw(HomeImage, 1200, 10, 0, 0.1, 0.1)
             elseif CurrentScreen == "Home" then
                 ExclusiveMusic:stop()
