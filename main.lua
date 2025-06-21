@@ -4,6 +4,7 @@ if arg[2] == "debug" then
     lldebugger.start()
 end
 function love.load()
+    math.randomseed(os.time()) -- Truc qui sert à faire un nombre aléatoire à chaque fois que j'utilise math.random(x,x)
     Object = {}
     Enemis = {}
     Ball = {}
@@ -23,6 +24,7 @@ function love.load()
     Recompenses = {
         { name = "" },
         { name = "Mini jeux" },
+        { name = "Timing!" },
         { name = "Musique Exclusive" },
         { name = "Basketball" },
         { name = "" },
@@ -81,13 +83,15 @@ function love.load()
     XofNet = 80
     Yofbasketball = 150
     BasketballShoot = false
+    Clicktime = false
+    ClickSequenceTimer = math.random(1.0, 4.0)
+    ClickTimerTrueOrFalse = 0.15
     --Victory variables
     Victory = false
     VictoryTimer = 0
     VictoryFontSize = 20
     Confetti = {}
-    VictoryDuration = 5        -- seconds
-    math.randomseed(os.time()) -- Truc qui sert à faire un nombre aléatoire à chaque fois que j'utilise math.random(x,x)
+    VictoryDuration = 5 -- seconds
     CanonImage = love.graphics.newImage("Pixel Heart.png")
     Heart = love.graphics.newImage("Canon.png")
     HomeImage = love.graphics.newImage("Home.png")
@@ -272,9 +276,14 @@ function TriggerVictory()
 end
 
 function love.update(dt)
-    if Trophee >= 4000 then
+    if Trophee >= 5000 then
         MG = {
             { name = "Basketball" }
+        }
+    elseif Trophee >= 3000 then
+        MG = {
+            { name = "Basketball" },
+            { name = "Timing!" }
         }
     end
     if VictoryTimer >= VictoryDuration then
@@ -301,9 +310,10 @@ function love.update(dt)
         Mission8 = true
     end
     T = T + dt
-    if PV == 0 then
+    if PV == 0 and CurrentScreen == "Game" then
         return
     end
+    print("CurrentScreen:" .. CurrentScreen)
     if CurrentScreen == "MiniGames1" then
         if not BasketballShoot and XofNet <= 100 then
             PON = 1
@@ -332,6 +342,24 @@ function love.update(dt)
                 Yofbasketball = 150
                 XofNet = 80
                 BasketballShoot = false
+            end
+        end
+    end
+    if CurrentScreen == "Timing!" then
+        print("ClickSequenceTimer:" .. ClickSequenceTimer)
+        print("ClickTimerTrueOrFalse:" .. ClickTimerTrueOrFalse)
+        if Clicktime == false then
+            ClickSequenceTimer = ClickSequenceTimer - dt
+            if ClickSequenceTimer <= 0 then
+                Clicktime = true
+            end
+        end
+        if Clicktime == true then
+            ClickTimerTrueOrFalse = ClickTimerTrueOrFalse - dt
+            if ClickTimerTrueOrFalse <= 0 then
+                Clicktime = false
+                ClickTimerTrueOrFalse = 0.23
+                ClickSequenceTimer = math.random(1.0, 4.0)
             end
         end
     end
@@ -730,6 +758,19 @@ function love.mousepressed(x, y, button)
             print("XofNet:" .. XofNet)
             if CurrentScreen == "MiniGames1" then
                 BasketballShoot = true
+            elseif CurrentScreen == "Timing!" then
+                if Clicktime == true then
+                    CurrentScreen = "Palais des trophée"
+                    Clicktime = false
+                    ClickTimerTrueOrFalse = 0.23
+                    ClickSequenceTimer = math.random(1.0, 4.0)
+                    TriggerVictory()
+                elseif Clicktime == false then
+                    CurrentScreen = "Palais des trophée"
+                    Clicktime = false
+                    ClickTimerTrueOrFalse = 0.23
+                    ClickSequenceTimer = math.random(1.0, 4.0)
+                end
             end
             if PrintDebug then
                 print("Starting:" .. tostring(Starting))
@@ -1005,8 +1046,10 @@ function love.mousepressed(x, y, button)
                     Level = 4
                 elseif Within(100, 100, x, y, 200, 50) and CurrentScreen == "Palais des trophée" and Trophee >= 2000 then
                     CurrentScreen = "MiniGames"
-                elseif Within(200, 400 + YofMG, x, y, 1100, 200) and CurrentScreen == "MiniGames" and Trophee >= 4000 then
+                elseif Within(200, 400 + YofMG, x, y, 1100, 200) and CurrentScreen == "MiniGames" and Trophee >= 5000 then
                     CurrentScreen = "MiniGames1"
+                elseif Within(200, 800 + YofMG, x, y, 1100, 200) and CurrentScreen == "MiniGames" and Trophee >= 3000 then
+                    CurrentScreen = "Timing!"
                 end
             else
                 if Within(175, 350, x, y, 200, 100) then
@@ -1097,6 +1140,12 @@ function love.draw()
                 love.graphics.setColor(1, 1, 1)
                 love.graphics.draw(BasketballImage, 675, Yofbasketball, 0, 0.07)
                 love.graphics.draw(NetImage, XofNet, 600, 0, 0.2)
+            elseif CurrentScreen == "Timing!" then
+                if Clicktime == false then
+                    love.graphics.setBackgroundColor(1, 0, 0)
+                elseif Clicktime == true then
+                    love.graphics.setBackgroundColor(0, 1, 0)
+                end
             elseif CurrentScreen == "Levels" then
                 if Levels_Unlocked >= 1 then
                     love.graphics.setFont(Font)
