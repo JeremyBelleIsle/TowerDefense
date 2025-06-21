@@ -39,7 +39,7 @@ function love.load()
         { name = "" },
     }
     MG = {
-        { name = "Basketball" }
+
     }
     EnnemisKilled = 0
     Y_Of_Enemis = 800
@@ -272,6 +272,11 @@ function TriggerVictory()
 end
 
 function love.update(dt)
+    if Trophee >= 4000 then
+        MG = {
+            { name = "Basketball" }
+        }
+    end
     if VictoryTimer >= VictoryDuration then
         Victory = false
     end
@@ -997,9 +1002,9 @@ function love.mousepressed(x, y, button)
                     Level = 3
                 elseif Within(1000, 600, x, y, 200, 100) and CurrentScreen == "Levels" and Levels_Unlocked >= 4 then
                     Level = 4
-                elseif Within(100, 100, x, y, 200, 100) and CurrentScreen == "Palais des trophée" and Trophee >= 0 then --pas 0:2000
+                elseif Within(100, 100, x, y, 200, 50) and CurrentScreen == "Palais des trophée" and Trophee >= 2000 then
                     CurrentScreen = "MiniGames"
-                elseif Within(200, 400 + YofMG, x, y, 1100, 200) and CurrentScreen == "MiniGames" and Trophee >= 0 then --pas 0:2000
+                elseif Within(200, 400 + YofMG, x, y, 1100, 200) and CurrentScreen == "MiniGames" and Trophee >= 4000 then
                     CurrentScreen = "MiniGames1"
                 end
             else
@@ -1063,7 +1068,7 @@ function love.draw()
             elseif CurrentScreen == "Palais des trophée" then
                 love.graphics.setBackgroundColor(0, 0, 0)
                 love.graphics.setColor(1, 1, 1)
-                if Trophee >= 0 then --pas 0:2000
+                if Trophee >= 2000 then
                     love.graphics.rectangle("fill", 100, 100, 200, 50)
                     love.graphics.setColor(0, 1, 0)
                     love.graphics.setFont(Font)
@@ -1286,7 +1291,7 @@ function love.draw()
                     love.graphics.setColor(1, 1, 1)
                     love.graphics.print("Retry", 400, 400)
                 end
-            elseif CurrentScreen == "Levels" then
+            elseif CurrentScreen == "Levels" or CurrentScreen == "MiniGames" or CurrentScreen == "Palais des trophée" then
                 love.graphics.draw(HomeImage, 1200, 10, 0, 0.1, 0.1)
             elseif CurrentScreen == "Home" then
                 ExclusiveMusic:stop()
@@ -1329,6 +1334,9 @@ function love.draw()
                 end
                 love.graphics.print("Trophées", 70, 515)
                 love.graphics.print(Trophee, 70, 560)
+                love.graphics.setColor(1, 1, 1)
+                love.graphics.draw(TropheeImage, 300, 570, 0, 0.05, 0.05)
+                love.graphics.setColor(0, 1, 0)
                 love.graphics.rectangle("fill", 10, 440, 300, 50)
                 love.graphics.setFont(FontMini)
                 love.graphics.setColor(0, 0, 0)
