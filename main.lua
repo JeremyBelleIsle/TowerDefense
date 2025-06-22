@@ -5,6 +5,8 @@ if arg[2] == "debug" then
 end
 function love.load()
     math.randomseed(os.time()) -- Truc qui sert à faire un nombre aléatoire à chaque fois que j'utilise math.random(x,x)
+    utf8 = require("utf8")
+    InputText = ""
     Object = {}
     Enemis = {}
     Ball = {}
@@ -88,6 +90,8 @@ function love.load()
     ClickTimerTrueOrFalse = 0.15
     XofRunner = 50
     TimeOfCourse = 6.0
+    Pari = false
+    Trophee_paried = 0
     --Victory variables
     Victory = false
     VictoryTimer = 0
@@ -137,6 +141,9 @@ function Within(SelfX, SelfY, x, y, w, h)
 end
 
 function love.textinput(t)
+    if Pari == true and CurrentScreen == "MiniGames" then
+        InputText = InputText .. t
+    end
     if PrintDebug then
         print("Code:" .. Code)
     end
@@ -263,6 +270,9 @@ function AllMissionsCompleted()
 end
 
 function TriggerVictory()
+    if Pari == true then
+        Trophee = Trophee + InputText
+    end
     Victory = true
     VictoryTimer = 0
     VictoryFontSize = 20
@@ -289,6 +299,9 @@ function love.update(dt)
             CurrentScreen = "Palais des trophée"
             TimeOfCourse = 7
             XofRunner = 50
+            if Pari then
+                Trophee = Trophee - InputText
+            end
         end
     end
     print(CurrentScreen)
@@ -362,6 +375,9 @@ function love.update(dt)
             elseif Yofbasketball >= 800 then
                 PON = 1
                 CurrentScreen = "Palais des trophée"
+                if Pari then
+                    Trophee = Trophee - InputText
+                end
                 Yofbasketball = 150
                 XofNet = 80
                 BasketballShoot = false
@@ -399,6 +415,22 @@ function love.update(dt)
             YofMG = YofMG - 20
         elseif love.keyboard.isDown("down") then
             YofMG = YofMG + 20
+        end
+        function love.keypressed(key)
+            if CurrentScreen == "MiniGames" and Pari == true then
+                if key == "backspace" then
+                    -- Supprimer le dernier caractère
+                    local byteoffset = utf8.offset(InputText, -1)
+                    if byteoffset then
+                        InputText = string.sub(InputText, 1, byteoffset - 1)
+                    end
+                elseif key == "return" then
+                    print("Tu as tapé : " .. InputText)
+                    if InputText > Trophee then
+                        InputText = ""
+                    end
+                end
+            end
         end
     end
     if CurrentScreen == "Runing" then
@@ -795,6 +827,9 @@ function love.mousepressed(x, y, button)
                     TriggerVictory()
                 elseif Clicktime == false then
                     CurrentScreen = "Palais des trophée"
+                    if Pari then
+                        Trophee = Trophee - InputText
+                    end
                     Clicktime = false
                     ClickTimerTrueOrFalse = 0.23
                     ClickSequenceTimer = math.random(1.0, 4.0)
@@ -1075,11 +1110,17 @@ function love.mousepressed(x, y, button)
                 elseif Within(100, 100, x, y, 200, 50) and CurrentScreen == "Palais des trophée" and Trophee >= 2000 then
                     CurrentScreen = "MiniGames"
                 elseif Within(200, 400 + YofMG, x, y, 1100, 200) and CurrentScreen == "MiniGames" and Trophee >= 5000 then
-                    CurrentScreen = "MiniGames1"
-                elseif Within(200, 800 + YofMG, x, y, 1100, 200) and CurrentScreen == "MiniGames" and Trophee >= 3000 then
                     CurrentScreen = "Timing!"
+                elseif Within(200, 800 + YofMG, x, y, 1100, 200) and CurrentScreen == "MiniGames" and Trophee >= 3000 then
+                    CurrentScreen = "MiniGames1"
                 elseif CurrentScreen == "MiniGames" and Within(200, 1200 + YofMG, x, y, 1100, 200) and Trophee >= 6000 then
                     CurrentScreen = "Runing"
+                elseif Within(75, 75, x, y, 200, 100) and CurrentScreen == "MiniGames" then
+                    if Pari == false then
+                        Pari = true
+                    else
+                        Pari = false
+                    end
                 end
             else
                 if Within(175, 350, x, y, 200, 100) then
@@ -1163,7 +1204,17 @@ function love.draw()
                     love.graphics.setFont(Font2)
                     love.graphics.rectangle("fill", 200, 400 * i + YofMG, 1100, 200)
                     love.graphics.setColor(0, 0, 0)
-                    love.graphics.print(MG[i].name, 250, 300 * i + 100 + YofMG)
+                    love.graphics.print(MG[i].name, 250, 325 * i + 100 + YofMG)
+                end
+                love.graphics.setColor(math.sin(T) + 0.30, 1, math.cos(T) + 0.30)
+                love.graphics.rectangle("fill", 75, 75, 200, 100)
+                love.graphics.setColor(1, 1, 1)
+                love.graphics.setFont(Font3)
+                love.graphics.print("Parier", 80, 80)
+                if Pari == true then
+                    love.graphics.setFont(love.graphics.newFont(32))
+                    love.graphics.print("Nombre de trophées à parier :", 300, 100)
+                    love.graphics.print(InputText, 300, 150)
                 end
             elseif CurrentScreen == "MiniGames1" then
                 love.graphics.setBackgroundColor(1, 1, 1)
