@@ -26,8 +26,8 @@ function love.load()
         { name = "Mini jeux" },
         { name = "Timing!" },
         { name = "Musique Exclusive" },
-        { name = "Basketball" },
-        { name = "" },
+        { name = "Basketball!" },
+        { name = "Runing!" },
         { name = "" },
         { name = "" },
         { name = "" },
@@ -76,7 +76,7 @@ function love.load()
     Mission9 = true
     ExclusiveMusictrueorfalse = false
     TimerOfStepOfEnemis = 3
-    Trophee = 4000
+    Trophee = 10000
     T = 0
     XofPDT = 0
     YofMG = 0
@@ -86,6 +86,8 @@ function love.load()
     Clicktime = false
     ClickSequenceTimer = math.random(1.0, 4.0)
     ClickTimerTrueOrFalse = 0.15
+    XofRunner = 50
+    TimeOfCourse = 6.0
     --Victory variables
     Victory = false
     VictoryTimer = 0
@@ -276,14 +278,36 @@ function TriggerVictory()
 end
 
 function love.update(dt)
+    if CurrentScreen == "Runing" then
+        TimeOfCourse = TimeOfCourse - dt
+        if TimeOfCourse > 0 and XofRunner >= 1200 then
+            CurrentScreen = "Palais des trophée"
+            TimeOfCourse = 7
+            XofRunner = 50
+            TriggerVictory()
+        elseif TimeOfCourse <= 0 and XofRunner < 1200 then
+            CurrentScreen = "Palais des trophée"
+            TimeOfCourse = 7
+            XofRunner = 50
+        end
+    end
+    print(CurrentScreen)
     if Trophee >= 5000 then
         MG = {
-            { name = "Basketball" }
+            { name = "Basket" }
         }
-    elseif Trophee >= 3000 then
+    end
+    if Trophee >= 3000 then
         MG = {
-            { name = "Basketball" },
-            { name = "Timing!" }
+            { name = "Timing!" },
+            { name = "Basket" }
+        }
+    end
+    if Trophee >= 6000 then
+        MG = {
+            { name = "Timing!" },
+            { name = "Basket" },
+            { name = "Runing!" }
         }
     end
     if VictoryTimer >= VictoryDuration then
@@ -313,7 +337,6 @@ function love.update(dt)
     if PV == 0 and CurrentScreen == "Game" then
         return
     end
-    print("CurrentScreen:" .. CurrentScreen)
     if CurrentScreen == "MiniGames1" then
         if not BasketballShoot and XofNet <= 100 then
             PON = 1
@@ -346,8 +369,6 @@ function love.update(dt)
         end
     end
     if CurrentScreen == "Timing!" then
-        print("ClickSequenceTimer:" .. ClickSequenceTimer)
-        print("ClickTimerTrueOrFalse:" .. ClickTimerTrueOrFalse)
         if Clicktime == false then
             ClickSequenceTimer = ClickSequenceTimer - dt
             if ClickSequenceTimer <= 0 then
@@ -380,6 +401,13 @@ function love.update(dt)
             YofMG = YofMG + 20
         end
     end
+    if CurrentScreen == "Runing" then
+        function love.keypressed(key)
+            if key == "space" then
+                XofRunner = XofRunner + 30
+            end
+        end
+    end
     if not Hello_Jeremy then
         PrincipalMusic:setVolume(VolumeOfMusic)
         HomeMusic:setVolume(VolumeOfMusic)
@@ -394,7 +422,7 @@ function love.update(dt)
         if #Enemis ~= 0 and Money ~= 0 and Level == 3 then
             Money = Money - 0.1
         end
-        if PV_Of_Boss <= 0 then -- Le boss est mort
+        if PV_Of_Boss <= 0 and CurrentScreen == "Game" then -- Le boss est mort
             Money = Money + 440
             PV_Of_Boss = 80
             WinTheBoss = true
@@ -413,13 +441,13 @@ function love.update(dt)
             print("currentWave:" .. CurrentWave)
         end
 
-        if CurrentWave == 3 and Level == 1 or Level == 2 then
+        if CurrentScreen == "Game" and CurrentWave == 3 and Level == 1 or Level == 2 then
             MaxEnnemisPerWave = 0
             Boss = true
             AlertSound:play()
         end
 
-        if CurrentWave == 4 and Level == 3 or Level == 4 then
+        if CurrentScreen == "Game" and CurrentWave == 4 and Level == 3 or Level == 4 then
             MaxEnnemisPerWave = 0
             Boss = true
             AlertSound:play()
@@ -432,7 +460,7 @@ function love.update(dt)
             if #Enemis == 0 then
                 WaveInProgress = false
                 TimeBeforeNextWave = TimeBeforeNextWave - dt
-                if math.ceil(TimeBeforeNextWave) <= 0 then
+                if math.ceil(TimeBeforeNextWave) <= 0 and CurrentScreen == "Game" then
                     Start_New_Wave()
                     if Level == 1 or Level == 3 or Level == 4 then
                         while #Enemis < MaxEnnemisPerWave do
@@ -1050,6 +1078,8 @@ function love.mousepressed(x, y, button)
                     CurrentScreen = "MiniGames1"
                 elseif Within(200, 800 + YofMG, x, y, 1100, 200) and CurrentScreen == "MiniGames" and Trophee >= 3000 then
                     CurrentScreen = "Timing!"
+                elseif CurrentScreen == "MiniGames" and Within(200, 1200 + YofMG, x, y, 1100, 200) and Trophee >= 6000 then
+                    CurrentScreen = "Runing"
                 end
             else
                 if Within(175, 350, x, y, 200, 100) then
@@ -1131,7 +1161,7 @@ function love.draw()
                 for i = 1, #MG, 1 do
                     love.graphics.setColor(1, 0, 0)
                     love.graphics.setFont(Font2)
-                    love.graphics.rectangle("fill", 200, 400 * i + YofMG, 1100, 300 * i - 100)
+                    love.graphics.rectangle("fill", 200, 400 * i + YofMG, 1100, 200)
                     love.graphics.setColor(0, 0, 0)
                     love.graphics.print(MG[i].name, 250, 300 * i + 100 + YofMG)
                 end
@@ -1146,6 +1176,12 @@ function love.draw()
                 elseif Clicktime == true then
                     love.graphics.setBackgroundColor(0, 1, 0)
                 end
+            elseif CurrentScreen == "Runing" then
+                love.graphics.setBackgroundColor(1, 1, 1)
+                love.graphics.setColor(0, 1, 0)
+                love.graphics.rectangle("fill", XofRunner, 600, 50, 50)
+                love.graphics.setFont(Font2)
+                love.graphics.print(math.ceil(TimeOfCourse), 200, 100)
             elseif CurrentScreen == "Levels" then
                 if Levels_Unlocked >= 1 then
                     love.graphics.setFont(Font)
