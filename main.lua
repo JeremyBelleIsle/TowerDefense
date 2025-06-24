@@ -47,7 +47,11 @@ function love.load()
     }
     EnnemisKilled = 0
     Y_Of_Enemis = 800
-    Money = 200
+    if Mode_De_Jeu ~= "Zéro" then
+        Money = 200
+    else
+        Money = 0
+    end
     PV = 20
     SpeedOfEnemis = 150
     IsCreativeMode = false
@@ -92,6 +96,9 @@ function love.load()
     TimeOfCourse = 6.0
     Pari = false
     Trophee_paried = 0
+    Mode_De_Jeu = "Normal"
+    BombeTimer = 5
+    SpeedRunChrono = 0.0
     --Victory variables
     Victory = false
     VictoryTimer = 0
@@ -287,7 +294,22 @@ function TriggerVictory()
     end
 end
 
+function Round(val, n)
+    local mult = 10 ^ (n or 0)
+    return math.floor(val * mult + 0.5) / mult
+end
+
 function love.update(dt)
+    if Mode_De_Jeu == "SpeedRun" then
+        SpeedRunChrono = SpeedRunChrono + dt
+    end
+    if Mode_De_Jeu == "Chaos" then
+        BombeTimer = BombeTimer - dt
+        if BombeTimer <= 0 then
+            BombeTimer = 5
+            table.remove(Object, math.random(1, #Object))
+        end
+    end
     if CurrentScreen == "Runing" then
         TimeOfCourse = TimeOfCourse - dt
         if TimeOfCourse > 0 and XofRunner >= 1200 then
@@ -860,11 +882,19 @@ function love.mousepressed(x, y, button)
                             ExclusiveMusic:play()
                         end
                         Object = {}
+                        print(Mode_De_Jeu)
+                        if Mode_De_Jeu == "Zéro" then
+                            table.insert(Object, { x = 600, y = math.random(200, 550), m = "Canon" })
+                        end
                         Enemis = {}
                         Ball = {}
                         BallGlace = {}
                         Y_Of_Enemis = 800
-                        Money = 200
+                        if Mode_De_Jeu ~= "Zéro" then
+                            Money = 200
+                        else
+                            Money = 0
+                        end
                         PV = 20
                         SpeedOfEnemis = 150
                         IsCreativeMode = false
@@ -900,11 +930,18 @@ function love.mousepressed(x, y, button)
                             ExclusiveMusic:play()
                         end
                         Object = {}
+                        if Mode_De_Jeu == "Zéro" then
+                            table.insert(Object, { x = 600, y = math.random(200, 550), m = "Canon" })
+                        end
                         Enemis = {}
                         Ball = {}
                         BallGlace = {}
                         Y_Of_Enemis = 800
-                        Money = 200
+                        if Mode_De_Jeu ~= "Zéro" then
+                            Money = 200
+                        else
+                            Money = 0
+                        end
                         PV = 20
                         SpeedOfEnemis = 150
                         IsCreativeMode = true
@@ -931,6 +968,9 @@ function love.mousepressed(x, y, button)
                     end
                     if Within(550, 700, x, y, 300, 100) and CurrentScreen == "Home" and not Tutorial then
                         CurrentScreen = "Levels"
+                    end
+                    if Within(550, 600, x, y, 300, 100) and CurrentScreen == "Home" and not Tutorial then
+                        CurrentScreen = "Modes"
                     end
                     if Within(700, 300, x, y, 20, 20) and CurrentScreen == "Settings" then
                         VolumeOfEffects = VolumeOfEffects - 0.1
@@ -1021,11 +1061,18 @@ function love.mousepressed(x, y, button)
                 if Within(510, 5, x, y, 400, 100) and PV > 0 and not IsCreativeMode then
                     IsCreativeMode = true
                     Object = {}
+                    if Mode_De_Jeu == "Zéro" then
+                        table.insert(Object, { x = 600, y = math.random(200, 550), m = "Canon" })
+                    end
                     Enemis = {}
                     Ball = {}
                     BallGlace = {}
                     Y_Of_Enemis = 800
-                    Money = 200
+                    if Mode_De_Jeu ~= "Zéro" then
+                        Money = 200
+                    else
+                        Money = 0
+                    end
                     PV = 20
                     SpeedOfEnemis = 150
                     Mode = "Canon"
@@ -1037,11 +1084,18 @@ function love.mousepressed(x, y, button)
                 elseif IsCreativeMode and Within(510, 5, x, y, 400, 100) and PV > 0 then
                     IsCreativeMode = false
                     Object = {}
+                    if Mode_De_Jeu == "Zéro" then
+                        table.insert(Object, { x = 600, y = math.random(200, 550), m = "Canon" })
+                    end
                     Enemis = {}
                     Ball = {}
                     BallGlace = {}
                     Y_Of_Enemis = 800
-                    Money = 200
+                    if Mode_De_Jeu ~= "Zéro" then
+                        Money = 200
+                    else
+                        Money = 0
+                    end
                     PV = 20
                     SpeedOfEnemis = 150
                     Mode = "Canon"
@@ -1053,11 +1107,18 @@ function love.mousepressed(x, y, button)
                 end
                 if Within(400, 400, x, y, 555, 250) and PV == 0 then --Bouton retry
                     Object = {}
+                    if Mode_De_Jeu == "Zéro" then
+                        table.insert(Object, { x = 600, y = math.random(200, 550), m = "Canon" })
+                    end
                     Enemis = {}
                     Ball = {}
                     BallGlace = {}
                     Y_Of_Enemis = 800
-                    Money = 200
+                    if Mode_De_Jeu ~= "Zéro" then
+                        Money = 200
+                    else
+                        Money = 0
+                    end
                     PV = 20
                     SpeedOfEnemis = 150
                     IsCreativeMode = false
@@ -1087,6 +1148,14 @@ function love.mousepressed(x, y, button)
                     HomeMusic:play()
                 elseif Within(10, 300, x, y, 400, 100) and CurrentScreen == "Home" then
                     CurrentScreen = "Settings"
+                elseif Within(10, 10, x, y, 740, 390) and CurrentScreen == "Modes" then
+                    Mode_De_Jeu = "Normal"
+                elseif Within(760, 410, x, y, 750, 400) and CurrentScreen == "Modes" then
+                    Mode_De_Jeu = "Chaos"
+                elseif Within(10, 410, x, y, 740, 400) and CurrentScreen == "Modes" then
+                    Mode_De_Jeu = "SpeedRun"
+                elseif Within(1200, 10, x, y, 730, 390) and not Within(1200, 10, x, y, 100, 100) and CurrentScreen == "Modes" then
+                    Mode_De_Jeu = "Zéro"
                 elseif Within(10, 700, x, y, 300, 100) then
                     MissionsScreen = true
                 elseif not Within(500, 225, x, y, 1000, 600) and MissionsScreen == true then
@@ -1180,6 +1249,20 @@ function love.draw()
                     love.graphics.setBackgroundColor(0, 0, 0)
                     love.graphics.draw(BackgroundLevel4, 0, 0, 0, 1.5)
                 end
+            elseif CurrentScreen == "Modes" then
+                love.graphics.setColor(0, 0, 0)
+                love.graphics.rectangle("fill", 10, 10, 740, 390)
+                love.graphics.rectangle("fill", 760, 410, 750, 400)
+                love.graphics.rectangle("fill", 10, 410, 740, 400)
+                love.graphics.rectangle("fill", 760, 10, 730, 390)
+                love.graphics.setColor(1, 1, 1)
+                love.graphics.setFont(Font2)
+                love.graphics.print("Normal", 20, 110)
+                love.graphics.print("Chaos", 770, 510)
+                love.graphics.setFont(love.graphics.newFont(135))
+                love.graphics.print("SpeedRun", 20, 510)
+                love.graphics.setFont(love.graphics.newFont(250))
+                love.graphics.print("Zéro", 770, 110)
             elseif CurrentScreen == "Palais des trophée" then
                 love.graphics.setBackgroundColor(0, 0, 0)
                 love.graphics.setColor(1, 1, 1)
@@ -1428,7 +1511,7 @@ function love.draw()
                     love.graphics.setColor(1, 1, 1)
                     love.graphics.print("Retry", 400, 400)
                 end
-            elseif CurrentScreen == "Levels" or CurrentScreen == "MiniGames" or CurrentScreen == "Palais des trophée" then
+            elseif CurrentScreen == "Levels" or CurrentScreen == "MiniGames" or CurrentScreen == "Palais des trophée" or CurrentScreen == "Modes" then
                 love.graphics.setColor(1, 1, 1)
                 love.graphics.rectangle("fill", 1200, 10, 100, 100)
                 love.graphics.draw(HomeImage, 1200, 10, 0, 0.1, 0.1)
@@ -1453,9 +1536,11 @@ function love.draw()
                 love.graphics.print("Mode Créatif", 610, 525)
                 love.graphics.setColor(0, 0, 0)
                 love.graphics.rectangle("fill", 550, 700, 300, 100)
+                love.graphics.rectangle("fill", 550, 600, 300, 100)
                 love.graphics.setColor(0, 1, 0)
                 love.graphics.setFont(Font3)
                 love.graphics.print("Levels", 610, 725)
+                love.graphics.print("Modes", 610, 625)
                 love.graphics.setFont(Font)
                 love.graphics.print("The official game of", 610, 10)
                 love.graphics.setFont(Font2)
@@ -1640,6 +1725,11 @@ function love.draw()
         love.graphics.setFont(love.graphics.newFont(VictoryFontSize))
         love.graphics.printf("VICTORY!", 0, 300, 1500, "center")
         love.graphics.setFont(Font) -- Reset your custom font
+    end
+    if CurrentScreen == "Game" and Mode_De_Jeu == "SpeedRun" then
+        love.graphics.setColor(1, 0, 0)
+        love.graphics.setFont(love.graphics.newFont(200))
+        love.graphics.print(Round(SpeedRunChrono, 2), 850, 400)
     end
 end
 
