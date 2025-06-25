@@ -99,6 +99,20 @@ function love.load()
     Mode_De_Jeu = "Normal"
     BombeTimer = 5
     SpeedRunChrono = 0.0
+    DialogueTimer = 1.7
+    DialogueTextIndex = 7
+    Dialogue = {
+        { "Bonjour, voici mon jeu de tower defense!" },
+        { "Dabord,les paramètres." },
+        { "Ici vous pouvez changer le volume des sons." },
+        { "Maintenant, les niveaux." },
+        { "Ici vous pouvez voir tout les niveaux débloqués." },
+        { "Revenons au menu et apprenons comment jouer." },
+        { "À droite vous pouvez placer des tourelles de contrôle." },
+        { "Les glaçeurs." },
+        { "À gauche vous pouvez placer des tourelles d'attaque." },
+        { "Les bombes, les canon et les mitraillette." },
+    }
     --Victory variables
     Victory = false
     VictoryTimer = 0
@@ -299,7 +313,22 @@ function Round(val, n)
     return math.floor(val * mult + 0.5) / mult
 end
 
+function PD(Number)
+    if Number < 11 then
+        love.graphics.setFont(Font)
+        love.graphics.setColor(1, 0, 0)
+        love.graphics.print(Dialogue[Number], 400, 250)
+    end
+end
+
 function love.update(dt)
+    if TutorialScreen == "6" then
+        DialogueTimer = DialogueTimer - dt
+        if DialogueTimer <= 0 then
+            DialogueTextIndex = DialogueTextIndex + 1
+            DialogueTimer = 1.7
+        end
+    end
     if Mode_De_Jeu == "SpeedRun" then
         SpeedRunChrono = SpeedRunChrono + dt
     end
@@ -1625,6 +1654,7 @@ function love.draw()
                 love.graphics.setColor(1, 1, 1)
             end
             if Tutorial and TutorialScreen == "1" then
+                PD(2)
                 CurrentScreen = "Home"
                 love.graphics.setColor(0, 0, 0)
                 love.graphics.draw(FingerImage, 200, 350, -100, Size_Of_Finger)
@@ -1634,12 +1664,14 @@ function love.draw()
                     Size_Of_Finger = Size_Of_Finger + 0.001
                 end
             elseif Tutorial and TutorialScreen == "2" then
+                PD(3)
                 CurrentScreen = "Settings"
                 love.graphics.setFont(Font2)
                 love.graphics.setColor(0, 0, 0)
                 love.graphics.print("Paramètres", 200, 500)
                 love.graphics.setColor(0, 1, 0)
             elseif TutorialScreen == "3" then
+                PD(4)
                 CurrentScreen = "Home"
                 love.graphics.setColor(0, 0, 0)
                 love.graphics.draw(FingerImage, 850, 750, -90, Size_Of_Finger)
@@ -1649,12 +1681,14 @@ function love.draw()
                     Size_Of_Finger = Size_Of_Finger + 0.001
                 end
             elseif TutorialScreen == "4" then
+                PD(5)
                 CurrentScreen = "Levels"
                 love.graphics.setFont(Font2)
                 love.graphics.setColor(0, 0, 0)
                 love.graphics.print("niveaux", 200, 500)
                 love.graphics.setColor(0, 1, 0)
             elseif TutorialScreen == "5" then
+                PD(6)
                 CurrentScreen = "Home"
                 love.graphics.setColor(0, 0, 0)
                 love.graphics.draw(FingerImage, 850, 400, -90, Size_Of_Finger)
@@ -1665,6 +1699,7 @@ function love.draw()
                 end
                 love.graphics.setColor(0, 1, 0)
             elseif TutorialScreen == "6" and PV > 0 then
+                PD(DialogueTextIndex)
                 CurrentScreen = "Game"
                 Mission7var2 = true
                 love.graphics.setColor(1, 0, 0, 0.5)
@@ -1687,6 +1722,7 @@ function love.draw()
                 TutorialScreen = 0
             end
         else
+            PD(1)
             love.graphics.setColor(0, 1, 0)
             love.graphics.setFont(Font)
             love.graphics.print("The official game of", 610, 10)
@@ -1731,6 +1767,7 @@ function love.draw()
         love.graphics.setFont(love.graphics.newFont(200))
         love.graphics.print(Round(SpeedRunChrono, 2), 850, 400)
     end
+    love.graphics.setColor(1, 1, 1)
 end
 
 --Debug
