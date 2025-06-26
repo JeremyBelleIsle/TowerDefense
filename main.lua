@@ -30,7 +30,7 @@ function love.load()
         { name = "Musique Exclusive" },
         { name = "Basketball!" },
         { name = "Runing!" },
-        { name = "" },
+        { name = "SuperPower" },
         { name = "" },
         { name = "" },
         { name = "" },
@@ -113,6 +113,10 @@ function love.load()
         { "À gauche vous pouvez placer des tourelles d'attaque." },
         { "Les bombes, les canon et les mitraillette." },
     }
+    Radius = 0
+    SuperPowerUsingTrueOrFalse = false
+    SP = false
+    SuperPowerTimer = 25
     --Victory variables
     Victory = false
     VictoryTimer = 0
@@ -321,7 +325,45 @@ function PD(Number)
     end
 end
 
+function TimerOfSP(Temp)
+    if Trophee >= 7000 then
+        SuperPowerTimer = SuperPowerTimer - Temp
+        if SuperPowerTimer <= 0 then
+            SuperPowerUsingTrueOrFalse = true
+        end
+    end
+end
+
+function WithinCircle(cx, cy, r, x, y)
+    local dx = cx - x
+    local dy = cy - y
+    return dx * dx + dy * dy <= r * r
+end
+
+function SuperPowerActivate(x, y)
+    if SP then
+        Radius = Radius + 20
+    end
+    if WithinCircle(250, 400, 55, x, y) then
+        if SuperPowerUsingTrueOrFalse == true then
+            SP = true
+            SuperPowerUsingTrueOrFalse = false
+            SuperPowerTimer = 25
+        end
+    end
+    if Radius >= 1500 then
+        SP = false
+    end
+    if not SP and Radius ~= 0 then
+        Radius = Radius - 20
+    end
+end
+
 function love.update(dt)
+    if CurrentScreen == "Game" and not Tutorial then
+        TimerOfSP(dt)
+    end
+    SuperPowerActivate(100000000, 1000000000)
     if TutorialScreen == "6" then
         DialogueTimer = DialogueTimer - dt
         if DialogueTimer <= 0 then
@@ -1234,6 +1276,9 @@ function love.mousepressed(x, y, button)
             if Within(10, 440, x, y, 300, 50) and CurrentScreen == "Home" and not Tutorial then
                 CurrentScreen = "Palais des trophée"
             end
+            if CurrentScreen == "Game" and not Tutorial then
+                SuperPowerActivate(x, y)
+            end
         elseif button == 2 then
             if not Starting then
                 for i, canon in ipairs(Object) do
@@ -1376,6 +1421,16 @@ function love.draw()
                 end
             end
             if CurrentScreen == "Game" then
+                if SuperPowerUsingTrueOrFalse == true then
+                    love.graphics.setColor(0.5, 0, 1)
+                    love.graphics.circle("fill", 250, 400, 55)
+                end
+                love.graphics.setColor(1, 1, 1, 0.96)
+                love.graphics.circle("fill", 100, 100, Radius)
+                if SP then
+                    EnnemisKilled = EnnemisKilled + #Enemis
+                    Enemis = {}
+                end
                 HomeMusic:stop()
                 if not ExclusiveMusictrueorfalse then
                     PrincipalMusic:play()
