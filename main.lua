@@ -117,6 +117,9 @@ function love.load()
     SuperPowerUsingTrueOrFalse = false
     SP = false
     SuperPowerTimer = 25
+    SuperPowerUsingTrueOrFalse2 = false
+    SP2 = false
+    SuperPowerTimer2 = 30
     --Victory variables
     Victory = false
     VictoryTimer = 0
@@ -332,6 +335,12 @@ function TimerOfSP(Temp)
             SuperPowerUsingTrueOrFalse = true
         end
     end
+    if Trophee >= 8000 then
+        SuperPowerTimer2 = SuperPowerTimer2 - Temp
+        if SuperPowerTimer2 <= 0 then
+            SuperPowerUsingTrueOrFalse2 = true
+        end
+    end
 end
 
 function WithinCircle(cx, cy, r, x, y)
@@ -357,6 +366,19 @@ function SuperPowerActivate(x, y)
     if not SP and Radius ~= 0 then
         Radius = Radius - 20
     end
+    if WithinCircle(250, 600, 55, x, y) then
+        if SuperPowerUsingTrueOrFalse2 == true then
+            SP2 = true
+            SuperPowerUsingTrueOrFalse2 = false
+            SuperPowerTimer2 = 25
+        end
+    end
+end
+
+function PlusVert(x, y)
+    love.graphics.setColor(0, 1, 0, 0.85)
+    love.graphics.rectangle("fill", x, y, 100, 30)
+    love.graphics.rectangle("fill", x + 30, y - 50, 30, 100)
 end
 
 function love.update(dt)
@@ -969,6 +991,12 @@ function love.mousepressed(x, y, button)
                         PV = 20
                         SpeedOfEnemis = 150
                         IsCreativeMode = false
+                        SP = false
+                        SuperPowerTimer = 25
+                        SuperPowerUsingTrueOrFalse = false
+                        SP2 = false
+                        SuperPowerTimer2 = 30
+                        SuperPowerUsingTrueOrFalse2 = false
                         Mode = "Canon"
                         CurrentWave = 0
                         WaveInProgress = false
@@ -1430,6 +1458,15 @@ function love.draw()
                 if SP then
                     EnnemisKilled = EnnemisKilled + #Enemis
                     Enemis = {}
+                end
+                if SuperPowerUsingTrueOrFalse2 == true then
+                    love.graphics.setColor(0.5, 0, 1)
+                    love.graphics.circle("fill", 250, 600, 55)
+                end
+                if SP2 then
+                    PV = 20
+                    PlusVert(math.random(900, 1100), math.random(100, 300))
+                    SP2 = false
                 end
                 HomeMusic:stop()
                 if not ExclusiveMusictrueorfalse then
