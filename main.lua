@@ -138,6 +138,7 @@ function love.load()
     TropheeImage = love.graphics.newImage("trophée.png")
     BasketballImage = love.graphics.newImage("Basketball.png")
     NetImage = love.graphics.newImage("Net.png")
+    Skull_HeadImage = love.graphics.newImage("Skull Head.png")
     ShootSound = love.audio.newSource("assets/mixkit-short-laser-gun-shot-1670.wav", "stream")
     GameOverSound = love.audio.newSource("assets/mixkit-sad-game-over-trombone-471.wav", "stream")
     BuzzSound = love.audio.newSource("assets/mixkit-wrong-electricity-buzz-955.wav", "stream")
@@ -353,7 +354,7 @@ function SuperPowerActivate(x, y)
     if SP then
         Radius = Radius + 20
     end
-    if WithinCircle(250, 400, 55, x, y) then
+    if WithinCircle(250, 325, 55, x, y) then
         if SuperPowerUsingTrueOrFalse == true then
             SP = true
             SuperPowerUsingTrueOrFalse = false
@@ -366,7 +367,7 @@ function SuperPowerActivate(x, y)
     if not SP and Radius ~= 0 then
         Radius = Radius - 20
     end
-    if WithinCircle(250, 600, 55, x, y) then
+    if WithinCircle(250, 450, 55, x, y) then
         if SuperPowerUsingTrueOrFalse2 == true then
             SP2 = true
             SuperPowerUsingTrueOrFalse2 = false
@@ -1451,7 +1452,9 @@ function love.draw()
             if CurrentScreen == "Game" then
                 if SuperPowerUsingTrueOrFalse == true then
                     love.graphics.setColor(0.5, 0, 1)
-                    love.graphics.circle("fill", 250, 400, 55)
+                    love.graphics.circle("fill", 250, 325, 55)
+                    love.graphics.setColor(0, 0, 0)
+                    love.graphics.draw(Skull_HeadImage, 180, 255, 0, 0.12)
                 end
                 love.graphics.setColor(1, 1, 1, 0.96)
                 love.graphics.circle("fill", 100, 100, Radius)
@@ -1461,7 +1464,8 @@ function love.draw()
                 end
                 if SuperPowerUsingTrueOrFalse2 == true then
                     love.graphics.setColor(0.5, 0, 1)
-                    love.graphics.circle("fill", 250, 600, 55)
+                    love.graphics.circle("fill", 250, 450, 55)
+                    PlusVert(200, 450)
                 end
                 if SP2 then
                     PV = 20
